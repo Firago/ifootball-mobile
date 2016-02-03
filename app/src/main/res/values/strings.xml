@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">iFootball</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+    <string name="pref_title_sending_switch">Enable sending</string>
+    <string name="pref_summary_sending_switch">Send accelerometer data to server</string>
+    <string name="pref_title_interval">Sending interval</string>
+
+
+</resources>
