@@ -1,5 +1,8 @@
 package com.mobica.ifootball.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.mobica.ifootball.utils.SensorTimeSerializer;
+
 import java.util.Date;
 
 /**
@@ -7,6 +10,7 @@ import java.util.Date;
  */
 public class SensorData {
 
+    @JsonSerialize(using = SensorTimeSerializer.class)
     private Date time;
     private Float value;
 

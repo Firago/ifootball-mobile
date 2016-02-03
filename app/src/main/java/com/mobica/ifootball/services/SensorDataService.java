@@ -15,9 +15,11 @@ import android.util.Log;
 import com.mobica.ifootball.domain.SensorData;
 import com.mobica.ifootball.domain.SensorDataSet;
 import com.mobica.ifootball.utils.SensorDataUtils;
-import com.mobica.ifootball.web.rest.PostSensorDataTask;
+import com.mobica.ifootball.web.rest.PostTask;
 
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by dmfi on 02/02/2016.
@@ -25,6 +27,8 @@ import java.util.Date;
 public class SensorDataService extends Service implements SensorEventListener {
 
     private final String TAG = getClass().getSimpleName();
+
+    private static final String URL = "https://ifootball-mobica.herokuapp.com/api/sensorData";
 
     private static final String INTERVAL_PREF_KEY = "interval";
     private static final String INTERVAL_DEF_VALUE = "100";
@@ -34,7 +38,9 @@ public class SensorDataService extends Service implements SensorEventListener {
     private Sensor accelerometerSensor;
 
     private SensorDataSet dataSet;
-    private long startMeasurementTime;
+    private Long startMeasurementTime;
+
+    private ExecutorService executorService;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -53,6 +59,7 @@ public class SensorDataService extends Service implements SensorEventListener {
         preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         dataSet = new SensorDataSet();
         startMeasurementTime = new Date().getTime();
+        executorService = Executors.newCachedThreadPool();
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME);
@@ -76,8 +83,7 @@ public class SensorDataService extends Service implements SensorEventListener {
                 // calculate root mean square
                 float rootMeanSquare = SensorDataUtils.getRootMeanSquare(dataSet);
                 Log.d(TAG, String.format("RootMeanSquare: %.3f", rootMeanSquare));
-                long eventTime = SensorDataUtils.convertNanosToMillis(event.timestamp);
-                postSensorData(new Date(eventTime), rootMeanSquare);
+                postSensorData(new Date(), rootMeanSquare);
                 dataSet.clear();
                 startMeasurementTime = currentTime;
             }
@@ -91,6 +97,7 @@ public class SensorDataService extends Service implements SensorEventListener {
 
     private void postSensorData(Date time, Float value) {
         SensorData sensorData = new SensorData(time, value);
-        new PostSensorDataTask().execute(sensorData);
+        PostTask<SensorData> task = new PostTask<>(sensorData, URL);
+        executorService.execute(task);
     }
 }

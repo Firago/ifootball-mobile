@@ -2,11 +2,13 @@ package com.mobica.ifootball;
 
 
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.support.v7.app.ActionBar;
@@ -58,11 +60,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             if ((boolean) value) {
-                ContextApplication.getAppContext().startService(new Intent(ContextApplication.getAppContext(), SensorDataService.class));
-                Toast.makeText(ContextApplication.getAppContext(), "SensorService START", Toast.LENGTH_SHORT).show();
+                ApplicationContext.startService(SensorDataService.class);
             } else {
-                ContextApplication.getAppContext().stopService(new Intent(ContextApplication.getAppContext(), SensorDataService.class));
-                Toast.makeText(ContextApplication.getAppContext(), "SensorService STOP", Toast.LENGTH_SHORT).show();
+                ApplicationContext.stopService(SensorDataService.class);
             }
             return true;
         }
@@ -157,7 +157,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         bindPreferenceSummaryToValue(findPreference("interval"));
 
         // start/stop service on preference change
-        findPreference("sending_switch").setOnPreferenceChangeListener(sendingSwitchPreferenceChangeListener);
+        configureSendingSwitch((CheckBoxPreference) findPreference("sending_switch"));
+    }
+
+    private void configureSendingSwitch(CheckBoxPreference preference) {
+        preference.setChecked(ApplicationContext.isServiceRunning(SensorDataService.class));
+        preference.setOnPreferenceChangeListener(sendingSwitchPreferenceChangeListener);
     }
 
     /**

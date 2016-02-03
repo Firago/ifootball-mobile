@@ -5,7 +5,6 @@ import com.mobica.ifootball.domain.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by dmfi on 02/02/2016.
@@ -53,7 +52,4 @@ public class SensorDataUtils {
         return result;
     }
 
-    public static long convertNanosToMillis(long nano) {
-        return TimeUnit.MILLISECONDS.convert(nano, TimeUnit.NANOSECONDS);
-    }
 }
